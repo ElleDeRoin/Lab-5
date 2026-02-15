@@ -1,0 +1,107 @@
+using UnityEngine;
+
+// Character Information
+[System.Serializable]
+public struct CharacterData
+{
+    public string characterName;
+    public int level;
+    public int constitution;
+    public bool isRolled;
+    public bool isTough;
+    public bool isStout;
+}
+
+// Base for each class
+public abstract class CharacterClassBase
+{
+    public abstract int HitDie { get; }
+}
+
+// Individual Classes
+public class Barbarian : CharacterClassBase { public override int HitDie => 12; }
+public class Fighter : CharacterClassBase { public override int HitDie => 10; }
+public class Paladin : CharacterClassBase { public override int HitDie => 10; }
+public class Ranger : CharacterClassBase { public override int HitDie => 10; }
+public class Bard : CharacterClassBase { public override int HitDie => 8; }
+public class Cleric : CharacterClassBase { public override int HitDie => 8; }
+public class Druid : CharacterClassBase { public override int HitDie => 8; }
+public class Monk : CharacterClassBase { public override int HitDie => 8; }
+public class Rogue : CharacterClassBase { public override int HitDie => 8; }
+public class Warlock : CharacterClassBase { public override int HitDie => 8; }
+public class Artificer : CharacterClassBase { public override int HitDie => 8; }
+public class Sorcerer : CharacterClassBase { public override int HitDie => 6; }
+public class Wizard : CharacterClassBase { public override int HitDie => 6; }
+
+// Base for each race
+public abstract class CharacterRaceBase
+{
+    public abstract int HpBonusPerLevel { get; }
+}
+
+// Individual Races
+public class Dwarf : CharacterRaceBase { public override int HpBonusPerLevel => 2; }
+public class Orc : CharacterRaceBase { public override int HpBonusPerLevel => 1; }
+public class Goliath : CharacterRaceBase { public override int HpBonusPerLevel => 1; }
+public class Human : CharacterRaceBase { public override int HpBonusPerLevel => 0; }
+public class Elf : CharacterRaceBase { public override int HpBonusPerLevel => 0; }
+public class Halfling : CharacterRaceBase { public override int HpBonusPerLevel => 0; }
+public class Tiefling : CharacterRaceBase { public override int HpBonusPerLevel => 0; }
+public class Dragonborn : CharacterRaceBase { public override int HpBonusPerLevel => 0; }
+public class Gnome : CharacterRaceBase { public override int HpBonusPerLevel => 0; }
+public class HalfElf : CharacterRaceBase { public override int HpBonusPerLevel => 0; }
+
+
+// Calculations based on classes and structs
+public class DnDCalc : MonoBehaviour
+{
+    public CharacterData characterData;
+
+    // declares variables for inheritance
+    private CharacterClassBase characterClass;
+    private CharacterRaceBase characterRace;
+
+    void Start()
+    {
+        // creates changable classes
+        characterClass = new Barbarian();
+        characterRace = new Dwarf();
+
+        int totalHP = CalculateHP();
+        Debug.Log($"{characterData.characterName} has {totalHP} HP.");
+    }
+
+    int GetConModifier(int conScore)
+    {
+        return (conScore - 10) / 2;
+    }
+
+    int RollHitDie(int hitDie, bool rolled)
+    {
+        if (rolled)
+            return Random.Range(1, hitDie + 1);
+        else
+            return (hitDie / 2) + 1;
+    }
+
+    int CalculateHP()
+    {
+        int totalHP = 0;
+        int conMod = GetConModifier(characterData.constitution);
+
+        for (int level = 1; level <= characterData.level; level++)
+        {
+            totalHP += RollHitDie(characterClass.HitDie, characterData.isRolled);
+            totalHP += conMod;
+            totalHP += characterRace.HpBonusPerLevel;
+
+            if (characterData.isTough)
+                totalHP += 2;
+
+            if (characterData.isStout)
+                totalHP += 1;
+        }
+
+        return totalHP;
+    }
+}
